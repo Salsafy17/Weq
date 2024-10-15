@@ -1,0 +1,30 @@
+from zapv2 import ZAPv2
+
+# إعداد ZAP
+zap = ZAPv2(apikey='your_api_key')
+
+# عنوان الموقع المراد اختباره
+target = 'http://example.com'
+
+# بدء الفحص
+print(f'بدء الفحص على {target}')
+zap.urlopen(target)
+zap.spider.scan(target)
+
+# انتظار انتهاء الفحص
+while int(zap.spider.status()) < 100:
+    print(f'الفحص قيد التنفيذ: {zap.spider.status()}%')
+
+print('الفحص انتهى. بدء الفحص النشط...')
+zap.ascan.scan(target)
+
+# انتظار انتهاء الفحص النشط
+while int(zap.ascan.status()) < 100:
+    print(f'الفحص النشط قيد التنفيذ: {zap.ascan.status()}%')
+
+print('الفحص النشط انتهى.')
+
+# الحصول على نتائج الفحص
+alerts = zap.core.alerts(baseurl=target)
+for alert in alerts:
+    print(f'ثغرة: {alert["name"]}, شدة: {alert["risk"]}, وصف: {alert["description"]}')
